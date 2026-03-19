@@ -2,6 +2,7 @@
 
 import { useDeferredValue, useState } from "react";
 import { Plus, Search } from "lucide-react";
+import { useShallow } from "zustand/react/shallow";
 
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
@@ -22,14 +23,16 @@ export function AddCardModal() {
     closeAddCardModal,
     instruments,
     snapshotsByInstrumentId,
-  } = useDashboardStore((state) => ({
-    addCardModal: state.addCardModal,
-    addMarketWidget: state.addMarketWidget,
-    addSupportingWidget: state.addSupportingWidget,
-    closeAddCardModal: state.closeAddCardModal,
-    instruments: state.instruments,
-    snapshotsByInstrumentId: state.snapshotsByInstrumentId,
-  }));
+  } = useDashboardStore(
+    useShallow((state) => ({
+      addCardModal: state.addCardModal,
+      addMarketWidget: state.addMarketWidget,
+      addSupportingWidget: state.addSupportingWidget,
+      closeAddCardModal: state.closeAddCardModal,
+      instruments: state.instruments,
+      snapshotsByInstrumentId: state.snapshotsByInstrumentId,
+    })),
+  );
 
   const normalizedQuery = deferredQuery.trim().toLowerCase();
   const filteredInstruments = instruments.filter((instrument) =>

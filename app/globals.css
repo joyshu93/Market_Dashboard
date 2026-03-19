@@ -3,6 +3,19 @@
 @tailwind utilities;
 
 :root {
+  color-scheme: light;
+  --app-bg: 238 242 248;
+  --app-panel: 255 255 255;
+  --app-panel-strong: 250 251 253;
+  --app-panel-soft: 241 245 249;
+  --app-border: 15 23 42;
+  --rise: 18 150 109;
+  --fall: 225 29 72;
+  --flat: 100 116 139;
+  --accent: 59 130 246;
+}
+
+html.dark {
   color-scheme: dark;
   --app-bg: 6 10 18;
   --app-panel: 11 17 28;
@@ -27,6 +40,13 @@ body {
 body {
   font-family: "IBM Plex Sans", "Segoe UI", "Helvetica Neue", sans-serif;
   background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 32%),
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.88), transparent 24%),
+    linear-gradient(180deg, rgba(244, 247, 251, 0.98), rgba(232, 238, 246, 1));
+}
+
+html.dark body {
+  background:
     radial-gradient(circle at top left, rgba(53, 104, 186, 0.18), transparent 32%),
     radial-gradient(circle at top right, rgba(138, 166, 225, 0.14), transparent 24%),
     linear-gradient(180deg, rgba(7, 12, 22, 0.98), rgba(4, 7, 13, 1));
@@ -43,6 +63,10 @@ body::before {
     linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
   background-size: 100px 100px;
   mask-image: radial-gradient(circle at center, black 30%, transparent 90%);
+}
+
+html.dark body::before {
+  opacity: 0.24;
 }
 
 ::selection {
@@ -105,8 +129,25 @@ body::before {
 }
 
 .react-resizable-handle {
+  width: 20px;
+  height: 20px;
+  right: 10px;
+  bottom: 10px;
   opacity: 0;
+  border-radius: 9999px;
+  background: rgba(8, 12, 20, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
   transition: opacity 150ms ease;
+}
+
+.react-resizable-handle::after {
+  right: 5px;
+  bottom: 5px;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid rgba(255, 255, 255, 0.68);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.68);
 }
 
 .react-grid-item:hover .react-resizable-handle,

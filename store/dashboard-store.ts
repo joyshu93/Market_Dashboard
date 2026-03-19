@@ -10,6 +10,7 @@ import {
   createDefaultDashboardSeed,
   createMarketWidget,
   createSupportingWidgetFromTemplate,
+  normalizeDashboardLayouts,
   removeWidgetLayouts,
 } from "@/lib/utils/dashboard";
 import type {
@@ -18,6 +19,9 @@ import type {
   BreakpointKey,
   ContextMenuState,
   DashboardLayouts,
+  MarketDataMeta,
+  MarketDataResponse,
+  MarketDataStatus,
   DashboardWidget,
   Instrument,
   MarketSnapshot,
@@ -53,6 +57,8 @@ interface DashboardState extends DashboardPersistedState {
   instruments: Instrument[];
   instrumentsById: Record<string, Instrument>;
   snapshotsByInstrumentId: Record<string, MarketSnapshot>;
+  marketDataStatus: MarketDataStatus;
+  marketDataMeta: MarketDataMeta | null;
   summaryCards: Record<string, SummaryCardData>;
   newsFeeds: Record<string, NewsFeedData>;
   adCards: Record<string, AdCardData>;
@@ -72,6 +78,7 @@ interface DashboardState extends DashboardPersistedState {
   closeAddCardModal: () => void;
   openContextMenu: (position: Pick<ContextMenuState, "x" | "y">) => void;
   closeContextMenu: () => void;
+  refreshMarketData: () => Promise<void>;
   addMarketWidget: (instrumentId: string) => void;
   addSupportingWidget: (templateId: string) => void;
   removeWidget: (widgetId: string) => void;
@@ -79,7 +86,7 @@ interface DashboardState extends DashboardPersistedState {
 
 const baseState: DashboardPersistedState = {
   widgets: defaultSeed.widgets,
-  layouts: defaultSeed.layouts,
+  layouts: normalizeDashboardLayouts(defaultSeed.layouts, defaultSeed.widgets),
   editMode: false,
   theme: "dark",
 };
@@ -91,6 +98,8 @@ export const useDashboardStore = create<DashboardState>()(
       instruments,
       instrumentsById: instrumentRecord,
       snapshotsByInstrumentId: marketSnapshots,
+      marketDataStatus: "idle",
+      marketDataMeta: null,
       summaryCards,
       newsFeeds,
       adCards,
@@ -106,7 +115,10 @@ export const useDashboardStore = create<DashboardState>()(
       setTheme: (theme) => set({ theme }),
       setActiveBreakpoint: (activeBreakpoint) => set({ activeBreakpoint }),
       selectWidget: (selectedWidgetId) => set({ selectedWidgetId }),
-      updateLayouts: (layouts) => set({ layouts }),
+      updateLayouts: (layouts) =>
+        set((state) => ({
+          layouts: normalizeDashboardLayouts(layouts, state.widgets),
+        })),
       openAddCardModal: (source, anchor) =>
         set({
           addCardModal: {
@@ -133,6 +145,41 @@ export const useDashboardStore = create<DashboardState>()(
         set({
           contextMenu: initialContextMenu,
         }),
+      refreshMarketData: async () => {
+        set({ marketDataStatus: "loading" });
+
+        try {
+          const response = await fetch("/api/market-snapshots", {
+            method: "GET",
+            cache: "no-store",
+          });
+
+          if (!response.ok) {
+            throw new Error(`Market snapshot request failed (${response.status})`);
+          }
+
+          const payload = (await response.json()) as MarketDataResponse;
+
+          set({
+            snapshotsByInstrumentId: payload.snapshots,
+            marketDataMeta: payload.meta,
+            marketDataStatus: payload.meta.status,
+          });
+        } catch (error) {
+          set({
+            marketDataStatus: "error",
+            marketDataMeta: {
+              fetchedAt: new Date().toISOString(),
+              status: "error",
+              activeSources: [],
+              errors: {
+                dashboard:
+                  error instanceof Error ? error.message : "Unable to refresh market data",
+              },
+            },
+          });
+        }
+      },
       addMarketWidget: (instrumentId) => {
         const widget = createMarketWidget(instrumentId);
         const nextLayouts = appendWidgetLayouts(get().layouts, widget.widgetType, widget.id);
@@ -177,10 +224,18 @@ export const useDashboardStore = create<DashboardState>()(
       merge: (persistedState, currentState) => ({
         ...currentState,
         ...(persistedState as Partial<DashboardPersistedState>),
+        layouts: normalizeDashboardLayouts(
+          (persistedState as Partial<DashboardPersistedState>).layouts ??
+            currentState.layouts,
+          (persistedState as Partial<DashboardPersistedState>).widgets ??
+            currentState.widgets,
+        ),
         addCardModal: initialAddCardModal,
         contextMenu: initialContextMenu,
         selectedWidgetId: null,
         activeBreakpoint: "lg",
+        marketDataStatus: "idle",
+        marketDataMeta: null,
       }),
     },
   ),

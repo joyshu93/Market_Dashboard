@@ -10,8 +10,8 @@ interface AdWidgetProps {
 
 export function AdWidget({ data }: AdWidgetProps) {
   return (
-    <div className="flex h-full flex-col justify-between gap-4 bg-[radial-gradient(circle_at_top_right,rgba(111,169,255,0.18),transparent_44%)]">
-      <div className="space-y-3">
+    <div className="flex h-full min-h-0 flex-col justify-between gap-4 bg-[radial-gradient(circle_at_top_right,rgba(111,169,255,0.18),transparent_44%)]">
+      <div className="min-w-0 space-y-3">
         <div className="flex items-center justify-between gap-3">
           <Pill label={data.eyebrow} tone="default" />
           <span className="text-xs uppercase tracking-[0.18em] text-slate-500">
@@ -20,15 +20,17 @@ export function AdWidget({ data }: AdWidgetProps) {
         </div>
 
         <div>
-          <h3 className="max-w-xl text-xl font-semibold leading-8 text-white">
+          <h3 className="line-clamp-2 max-w-xl text-xl font-semibold leading-8 text-white">
             {data.title}
           </h3>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">{data.message}</p>
+          <p className="mt-3 line-clamp-3 max-w-xl text-sm leading-6 text-slate-300">
+            {data.message}
+          </p>
         </div>
       </div>
 
       <div className="flex items-end justify-between gap-4">
-        <p className="max-w-sm text-xs leading-5 text-slate-500">{data.note}</p>
+        <p className="line-clamp-2 max-w-sm text-xs leading-5 text-slate-500">{data.note}</p>
 
         <Button variant="secondary" className="shrink-0">
           {data.ctaLabel}

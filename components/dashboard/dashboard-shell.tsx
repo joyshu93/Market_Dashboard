@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
+import { useShallow } from "zustand/react/shallow";
 
 import { AddCardModal } from "@/components/dashboard/add-card-modal";
 import { DashboardContextMenu } from "@/components/dashboard/context-menu";
@@ -19,16 +20,20 @@ export function DashboardShell() {
     contextMenu,
     openAddCardModal,
     openContextMenu,
+    refreshMarketData,
     theme,
-  } = useDashboardStore((state) => ({
-    addCardModal: state.addCardModal,
-    closeAddCardModal: state.closeAddCardModal,
-    closeContextMenu: state.closeContextMenu,
-    contextMenu: state.contextMenu,
-    openAddCardModal: state.openAddCardModal,
-    openContextMenu: state.openContextMenu,
-    theme: state.theme,
-  }));
+  } = useDashboardStore(
+    useShallow((state) => ({
+      addCardModal: state.addCardModal,
+      closeAddCardModal: state.closeAddCardModal,
+      closeContextMenu: state.closeContextMenu,
+      contextMenu: state.contextMenu,
+      openAddCardModal: state.openAddCardModal,
+      openContextMenu: state.openContextMenu,
+      refreshMarketData: state.refreshMarketData,
+      theme: state.theme,
+    })),
+  );
 
   useEffect(() => {
     setHydrated(true);
@@ -37,6 +42,18 @@ export function DashboardShell() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
+
+  useEffect(() => {
+    void refreshMarketData();
+
+    const refreshMs = Number(process.env.NEXT_PUBLIC_MARKET_REFRESH_MS ?? "300000");
+    const intervalMs = Number.isFinite(refreshMs) && refreshMs >= 60_000 ? refreshMs : 300_000;
+    const timer = window.setInterval(() => {
+      void refreshMarketData();
+    }, intervalMs);
+
+    return () => window.clearInterval(timer);
+  }, [refreshMarketData]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

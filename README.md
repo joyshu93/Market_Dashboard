@@ -20,6 +20,23 @@ npm run dev
 
 Open [http://localhost:3000/dashboard](http://localhost:3000/dashboard).
 
+Planning baseline: [`docs/product-mvp-plan.md`](./docs/product-mvp-plan.md)
+
+### Environment
+
+Create `.env.local` from `.env.example`.
+
+```bash
+cp .env.example .env.local
+```
+
+Required for live market integration:
+
+- `FRED_API_KEY`
+- `DATA_GO_KR_SERVICE_KEY`
+- `ALPHA_VANTAGE_API_KEY`
+- `NEXT_PUBLIC_MARKET_REFRESH_MS` optional, defaults to `300000` ms
+
 ### Verification
 
 ```bash
@@ -42,11 +59,18 @@ npm run build
 
 The same market data instance can render in three modes:
 
+- Desktop uses a `16`-column tile grid as the design baseline.
+- All cards use only three canonical form factors:
+- `small` = `2 x 2`
+- `wide` = `4 x 2`
+- `large` = `4 x 4`
+- `large` is exactly four times the area of `small`
+- `wide` is the top or bottom half of `large`
 - `small`: name, price, change, compact status
 - `wide`: name, price, change, percent, sparkline, update time
 - `large`: price block, detail chart, extra metrics, contextual summary
 
-Sizing is resolved automatically from grid dimensions in `lib/utils/dashboard.ts` via `resolveMarketViewMode`.
+Sizing is resolved automatically from grid dimensions in `lib/utils/dashboard.ts` via `resolveMarketViewMode`, and all widget layouts are normalized back to those canonical sizes whenever the layout changes or persisted state is loaded.
 
 ## Architecture
 
@@ -172,6 +196,28 @@ Persisted items:
 - theme
 
 Transient UI state such as selected widget, context menu coordinates, and modal state is intentionally not persisted.
+
+## Live data integration
+
+The dashboard now uses a server-side aggregation route at `/api/market-snapshots`.
+
+Source mapping:
+
+- `KOSPI`, `KOSDAQ`: `data.go.kr` KRX index OpenAPI
+- `S&P 500`, `NASDAQ`, `WTI`, `US 10Y`, `BTC`, and fallback `USD/KRW`: FRED API
+- `Gold Spot` and live-priority `USD/KRW` / `BTC`: Alpha Vantage
+
+Behavior:
+
+- The client refreshes snapshots on load and then on a configurable interval.
+- If one provider fails, the dashboard falls back to the seeded mock snapshot for that instrument.
+- The universal widget system stays unchanged, so live data only replaces the snapshot layer.
+
+Current tradeoff:
+
+- This implementation prefers exact underlying instruments and official/public data sources.
+- Because of that, freshness is mixed by asset class: some feeds are closer to live, while some official feeds are daily cadence.
+- If you want intraday US index moves at the expense of exact index-source purity, the next step would be to add a proxy or commercial market-data provider.
 
 ## Mock content included
 

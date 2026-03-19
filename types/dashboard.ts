@@ -9,7 +9,7 @@ export type InstrumentCategory =
   | "macro";
 
 export type WidgetType = "market" | "summary" | "news" | "ad";
-export type ThemeMode = "dark";
+export type ThemeMode = "dark" | "light";
 export type MarketTrend = "up" | "down" | "flat";
 export type MarketWidgetDensity = "small" | "wide" | "large";
 export type WidgetViewMode = "auto" | MarketWidgetDensity;
@@ -18,6 +18,8 @@ export type AddCardSource = "header" | "context-menu" | "mobile-fab";
 export type ContextMenuSource = "dashboard-empty-space";
 export type MetricTone = "positive" | "negative" | "neutral";
 export type ValueStyle = "number" | "currency" | "percent";
+export type SnapshotSource = "mock" | "fred" | "data-go-kr" | "alpha-vantage";
+export type MarketDataStatus = "idle" | "loading" | "live" | "partial" | "mock" | "error";
 
 export interface InstrumentMetadata {
   precision?: number;
@@ -60,6 +62,21 @@ export interface MarketSnapshot {
   statusText?: string;
   summary?: string;
   extraMetrics: MarketExtraMetric[];
+  source?: SnapshotSource;
+  sourceLabel?: string;
+  isFallback?: boolean;
+}
+
+export interface MarketDataMeta {
+  fetchedAt: string;
+  status: Exclude<MarketDataStatus, "idle" | "loading">;
+  activeSources: SnapshotSource[];
+  errors?: Record<string, string>;
+}
+
+export interface MarketDataResponse {
+  snapshots: Record<string, MarketSnapshot>;
+  meta: MarketDataMeta;
 }
 
 export interface WidgetLayoutItem {

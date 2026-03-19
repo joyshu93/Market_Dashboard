@@ -28,15 +28,15 @@ export function WidgetShell({
     <article
       data-widget-id={widgetId}
       className={cn(
-        "card-surface group relative h-full overflow-hidden p-4 transition duration-200 sm:p-5",
+        "card-surface group relative h-full overflow-hidden p-3 transition duration-200 sm:p-4",
         selected ? "border-white/30 shadow-[0_24px_56px_rgba(111,169,255,0.18)]" : "border-white/10",
         className,
       )}
       onMouseDown={onSelect}
     >
       {editMode ? (
-        <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between bg-gradient-to-b from-slate-950/70 via-slate-950/25 to-transparent px-3 pb-8 pt-3">
-          <div className="widget-drag-handle inline-flex cursor-grab items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-300">
+        <div className="pointer-events-none absolute inset-x-3 top-3 z-20 flex items-start justify-between gap-3">
+          <div className="widget-drag-handle pointer-events-auto inline-flex cursor-grab items-center gap-2 rounded-full border border-white/12 bg-slate-950/75 px-2.5 py-1.5 text-[11px] uppercase tracking-[0.18em] text-slate-200 shadow-[0_12px_24px_rgba(0,0,0,0.22)] backdrop-blur-md">
             <GripVertical className="h-3.5 w-3.5" />
             Move
           </div>
@@ -45,7 +45,7 @@ export function WidgetShell({
             variant="ghost"
             size="icon"
             aria-label="Remove widget"
-            className="h-8 w-8 bg-slate-950/35 text-slate-300 hover:bg-rose-500/18 hover:text-rose-200"
+            className="pointer-events-auto h-8 w-8 rounded-full border border-white/10 bg-slate-950/72 text-slate-300 shadow-[0_12px_24px_rgba(0,0,0,0.2)] backdrop-blur-md hover:bg-rose-500/18 hover:text-rose-200"
             onClick={(event) => {
               event.stopPropagation();
               onRemove();
@@ -56,7 +56,9 @@ export function WidgetShell({
         </div>
       ) : null}
 
-      <div className="relative h-full">{children}</div>
+      <div className={cn("relative flex h-full min-h-0 flex-col", editMode && "pt-10 sm:pt-11")}>
+        {children}
+      </div>
     </article>
   );
 }

@@ -1,6 +1,10 @@
 import { adCards, newsFeeds, summaryCards, supportingWidgetTemplates } from "@/lib/mock/supporting-data";
 import { marketSnapshots } from "@/lib/mock/market-data";
-import { dashboardCols, widgetRegistry } from "@/lib/widget-registry/widget-registry";
+import {
+  cardSizePresets,
+  dashboardCols,
+  widgetRegistry,
+} from "@/lib/widget-registry/widget-registry";
 import type {
   AdDashboardWidget,
   BreakpointKey,
@@ -17,6 +21,8 @@ export const dashboardRowHeight = 108;
 export const dashboardMargin: [number, number] = [18, 18];
 export const dashboardPadding: [number, number] = [0, 0];
 
+const marketSizeSequence: MarketWidgetDensity[] = ["small", "wide", "large"];
+
 export function createId(prefix: string) {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return `${prefix}-${crypto.randomUUID()}`;
@@ -30,15 +36,96 @@ export function resolveMarketViewMode(layout?: WidgetLayoutItem): MarketWidgetDe
     return "wide";
   }
 
-  if (layout.h >= 3 || (layout.w >= 4 && layout.h >= 3)) {
+  if (
+    layout.w >= cardSizePresets.large.w &&
+    layout.h >= cardSizePresets.large.h
+  ) {
     return "large";
   }
 
-  if (layout.w >= 4 || (layout.w >= 3 && layout.h >= 2)) {
+  if (
+    layout.w >= cardSizePresets.wide.w &&
+    layout.h >= cardSizePresets.wide.h
+  ) {
     return "wide";
   }
 
   return "small";
+}
+
+function getClosestAllowedTileSize(
+  item: Pick<WidgetLayoutItem, "w" | "h">,
+  widgetType: DashboardWidget["widgetType"],
+  breakpoint: BreakpointKey,
+) {
+  const allowedSizes = widgetRegistry[widgetType].allowedSizePresets
+    .map((sizeKey) => cardSizePresets[sizeKey])
+    .filter((size) => size.w <= dashboardCols[breakpoint]);
+
+  return allowedSizes.reduce((closest, candidate) => {
+    const closestDistance =
+      Math.abs(item.w - closest.w) * 2 + Math.abs(item.h - closest.h);
+    const candidateDistance =
+      Math.abs(item.w - candidate.w) * 2 + Math.abs(item.h - candidate.h);
+
+    return candidateDistance < closestDistance ? candidate : closest;
+  });
+}
+
+export function normalizeWidgetLayoutItem(
+  item: WidgetLayoutItem,
+  widgetType: DashboardWidget["widgetType"],
+  breakpoint: BreakpointKey,
+): WidgetLayoutItem {
+  const snappedSize = getClosestAllowedTileSize(item, widgetType, breakpoint);
+  const allowedSizes = widgetRegistry[widgetType].allowedSizePresets
+    .map((sizeKey) => cardSizePresets[sizeKey])
+    .filter((size) => size.w <= dashboardCols[breakpoint]);
+  const minWidth = Math.min(...allowedSizes.map((size) => size.w));
+  const minHeight = Math.min(...allowedSizes.map((size) => size.h));
+  const maxWidth = Math.min(
+    Math.max(...allowedSizes.map((size) => size.w)),
+    dashboardCols[breakpoint],
+  );
+  const maxHeight = Math.max(...allowedSizes.map((size) => size.h));
+
+  return {
+    ...item,
+    w: snappedSize.w,
+    h: snappedSize.h,
+    x: Math.max(0, Math.min(item.x, dashboardCols[breakpoint] - snappedSize.w)),
+    minW: minWidth,
+    minH: minHeight,
+    maxW: maxWidth,
+    maxH: maxHeight,
+  };
+}
+
+export function normalizeDashboardLayouts(
+  layouts: DashboardLayouts,
+  widgets: DashboardWidget[],
+): DashboardLayouts {
+  const widgetTypeById = new Map(widgets.map((widget) => [widget.id, widget.widgetType]));
+
+  const normalizeBreakpointLayouts = (
+    items: WidgetLayoutItem[],
+    breakpoint: BreakpointKey,
+  ) =>
+    items.map((item) => {
+      const widgetType = widgetTypeById.get(item.i);
+
+      if (widgetType) {
+        return normalizeWidgetLayoutItem(item, widgetType, breakpoint);
+      }
+
+      return item;
+    });
+
+  return {
+    lg: normalizeBreakpointLayouts(layouts.lg, "lg"),
+    md: normalizeBreakpointLayouts(layouts.md, "md"),
+    sm: normalizeBreakpointLayouts(layouts.sm, "sm"),
+  };
 }
 
 export function findNextY(layouts: WidgetLayoutItem[]) {
@@ -180,50 +267,50 @@ export function createDefaultDashboardSeed(): {
 
   const layouts: DashboardLayouts = {
     lg: [
-      { i: summary.id, x: 0, y: 0, w: 4, h: 3, minW: 3, minH: 3, maxW: 6, maxH: 4 },
-      { i: kospi.id, x: 4, y: 0, w: 4, h: 2, minW: 2, minH: 2, maxW: 6, maxH: 5 },
-      { i: kosdaq.id, x: 8, y: 0, w: 2, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
-      { i: usdKrw.id, x: 10, y: 0, w: 2, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
-      { i: sp500.id, x: 4, y: 2, w: 4, h: 2, minW: 3, minH: 2, maxW: 6, maxH: 5 },
-      { i: nasdaq.id, x: 8, y: 2, w: 4, h: 2, minW: 3, minH: 2, maxW: 6, maxH: 5 },
-      { i: gold.id, x: 0, y: 3, w: 3, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
-      { i: wti.id, x: 3, y: 3, w: 3, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
-      { i: us10y.id, x: 6, y: 4, w: 3, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
-      { i: btc.id, x: 9, y: 4, w: 3, h: 3, minW: 3, minH: 2, maxW: 6, maxH: 5 },
-      { i: news.id, x: 0, y: 5, w: 6, h: 3, minW: 4, minH: 3, maxW: 8, maxH: 5 },
-      { i: ad.id, x: 6, y: 6, w: 3, h: 2, minW: 3, minH: 2, maxW: 6, maxH: 3 },
+      { i: summary.id, x: 0, y: 0, w: 4, h: 4, minW: 4, minH: 4, maxW: 4, maxH: 4 },
+      { i: news.id, x: 4, y: 0, w: 4, h: 4, minW: 4, minH: 4, maxW: 4, maxH: 4 },
+      { i: btc.id, x: 8, y: 0, w: 4, h: 4, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: kospi.id, x: 12, y: 0, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: ad.id, x: 12, y: 2, w: 4, h: 2, minW: 4, minH: 2, maxW: 4, maxH: 2 },
+      { i: sp500.id, x: 0, y: 4, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: nasdaq.id, x: 4, y: 4, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: kosdaq.id, x: 8, y: 4, w: 2, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: usdKrw.id, x: 10, y: 4, w: 2, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: gold.id, x: 12, y: 4, w: 2, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: wti.id, x: 14, y: 4, w: 2, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: us10y.id, x: 0, y: 6, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
     ],
     md: [
-      { i: summary.id, x: 0, y: 0, w: 4, h: 3, minW: 4, minH: 3, maxW: 6, maxH: 4 },
-      { i: kospi.id, x: 4, y: 0, w: 4, h: 2, minW: 4, minH: 2, maxW: 6, maxH: 4 },
-      { i: sp500.id, x: 0, y: 3, w: 4, h: 2, minW: 4, minH: 2, maxW: 6, maxH: 4 },
-      { i: nasdaq.id, x: 4, y: 2, w: 4, h: 2, minW: 4, minH: 2, maxW: 6, maxH: 4 },
-      { i: kosdaq.id, x: 0, y: 5, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
-      { i: usdKrw.id, x: 4, y: 4, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
-      { i: gold.id, x: 0, y: 7, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
-      { i: wti.id, x: 4, y: 6, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
-      { i: us10y.id, x: 0, y: 9, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
-      { i: btc.id, x: 4, y: 8, w: 4, h: 3, minW: 4, minH: 3, maxW: 6, maxH: 5 },
-      { i: news.id, x: 0, y: 11, w: 8, h: 3, minW: 4, minH: 3, maxW: 8, maxH: 5 },
-      { i: ad.id, x: 0, y: 14, w: 8, h: 2, minW: 4, minH: 2, maxW: 8, maxH: 3 },
+      { i: summary.id, x: 0, y: 0, w: 4, h: 4, minW: 4, minH: 4, maxW: 4, maxH: 4 },
+      { i: news.id, x: 4, y: 0, w: 4, h: 4, minW: 4, minH: 4, maxW: 4, maxH: 4 },
+      { i: btc.id, x: 0, y: 4, w: 4, h: 4, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: kospi.id, x: 4, y: 4, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: ad.id, x: 4, y: 6, w: 4, h: 2, minW: 4, minH: 2, maxW: 4, maxH: 2 },
+      { i: sp500.id, x: 0, y: 8, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: nasdaq.id, x: 4, y: 8, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: kosdaq.id, x: 0, y: 10, w: 2, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: usdKrw.id, x: 2, y: 10, w: 2, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: gold.id, x: 4, y: 10, w: 2, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: wti.id, x: 6, y: 10, w: 2, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: us10y.id, x: 0, y: 12, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
     ],
     sm: [
-      { i: summary.id, x: 0, y: 0, w: 4, h: 3, minW: 4, minH: 3, maxW: 4, maxH: 4 },
-      { i: kospi.id, x: 0, y: 3, w: 4, h: 2, minW: 4, minH: 2, maxW: 4, maxH: 4 },
-      { i: kosdaq.id, x: 0, y: 5, w: 4, h: 2, minW: 4, minH: 2, maxW: 4, maxH: 4 },
-      { i: sp500.id, x: 0, y: 7, w: 4, h: 2, minW: 4, minH: 2, maxW: 4, maxH: 4 },
-      { i: nasdaq.id, x: 0, y: 9, w: 4, h: 2, minW: 4, minH: 2, maxW: 4, maxH: 4 },
-      { i: usdKrw.id, x: 0, y: 11, w: 4, h: 2, minW: 4, minH: 2, maxW: 4, maxH: 4 },
-      { i: gold.id, x: 0, y: 13, w: 4, h: 2, minW: 4, minH: 2, maxW: 4, maxH: 4 },
-      { i: wti.id, x: 0, y: 15, w: 4, h: 2, minW: 4, minH: 2, maxW: 4, maxH: 4 },
-      { i: us10y.id, x: 0, y: 17, w: 4, h: 2, minW: 4, minH: 2, maxW: 4, maxH: 4 },
-      { i: btc.id, x: 0, y: 19, w: 4, h: 3, minW: 4, minH: 3, maxW: 4, maxH: 5 },
-      { i: news.id, x: 0, y: 22, w: 4, h: 3, minW: 4, minH: 3, maxW: 4, maxH: 5 },
-      { i: ad.id, x: 0, y: 25, w: 4, h: 2, minW: 4, minH: 2, maxW: 4, maxH: 3 },
+      { i: summary.id, x: 0, y: 0, w: 4, h: 4, minW: 4, minH: 4, maxW: 4, maxH: 4 },
+      { i: news.id, x: 0, y: 4, w: 4, h: 4, minW: 4, minH: 4, maxW: 4, maxH: 4 },
+      { i: btc.id, x: 0, y: 8, w: 4, h: 4, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: kospi.id, x: 0, y: 12, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: ad.id, x: 0, y: 14, w: 4, h: 2, minW: 4, minH: 2, maxW: 4, maxH: 2 },
+      { i: sp500.id, x: 0, y: 16, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: nasdaq.id, x: 0, y: 18, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: kosdaq.id, x: 0, y: 20, w: 2, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: usdKrw.id, x: 2, y: 20, w: 2, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: gold.id, x: 0, y: 22, w: 2, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: wti.id, x: 2, y: 22, w: 2, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
+      { i: us10y.id, x: 0, y: 24, w: 4, h: 2, minW: 2, minH: 2, maxW: 4, maxH: 4 },
     ],
   };
 
-  return { widgets, layouts };
+  return { widgets, layouts: normalizeDashboardLayouts(layouts, widgets) };
 }
 
 export function buildInstrumentSearchText(name: string, symbol: string, tags: string[]) {

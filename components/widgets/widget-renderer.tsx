@@ -1,5 +1,7 @@
 "use client";
 
+import { useShallow } from "zustand/react/shallow";
+
 import { MarketWidget } from "@/components/widgets/market/market-widget";
 import { AdWidget } from "@/components/widgets/supporting/ad-widget";
 import { NewsWidget } from "@/components/widgets/supporting/news-widget";
@@ -24,17 +26,19 @@ export function WidgetRenderer({ widget, layout }: WidgetRendererProps) {
     selectedWidgetId,
     snapshotsByInstrumentId,
     summaryCards,
-  } = useDashboardStore((state) => ({
-    adCards: state.adCards,
-    editMode: state.editMode,
-    instrumentsById: state.instrumentsById,
-    newsFeeds: state.newsFeeds,
-    removeWidget: state.removeWidget,
-    selectWidget: state.selectWidget,
-    selectedWidgetId: state.selectedWidgetId,
-    snapshotsByInstrumentId: state.snapshotsByInstrumentId,
-    summaryCards: state.summaryCards,
-  }));
+  } = useDashboardStore(
+    useShallow((state) => ({
+      adCards: state.adCards,
+      editMode: state.editMode,
+      instrumentsById: state.instrumentsById,
+      newsFeeds: state.newsFeeds,
+      removeWidget: state.removeWidget,
+      selectWidget: state.selectWidget,
+      selectedWidgetId: state.selectedWidgetId,
+      snapshotsByInstrumentId: state.snapshotsByInstrumentId,
+      summaryCards: state.summaryCards,
+    })),
+  );
 
   let content: React.ReactNode = null;
 

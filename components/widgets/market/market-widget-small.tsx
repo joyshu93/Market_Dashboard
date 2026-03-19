@@ -13,12 +13,12 @@ export function MarketWidgetSmall({ model }: MarketWidgetSmallProps) {
     model.trend === "up" ? ArrowUpRight : model.trend === "down" ? ArrowDownRight : Minus;
 
   return (
-    <div className="flex h-full flex-col justify-between gap-4">
+    <div className="flex h-full min-h-0 flex-col justify-between gap-3">
       <div className="flex items-start justify-between gap-3">
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <Pill label={model.instrument.category} tone="neutral" />
           <div>
-            <p className="text-sm font-medium text-white">{model.instrument.symbol}</p>
+            <p className="truncate text-sm font-medium text-white">{model.instrument.symbol}</p>
             <p className="mt-1 text-xs leading-5 text-slate-400">{model.instrument.market}</p>
           </div>
         </div>
@@ -30,11 +30,13 @@ export function MarketWidgetSmall({ model }: MarketWidgetSmallProps) {
         </div>
       </div>
 
-      <div className="space-y-2">
-        <p className="text-2xl font-semibold tracking-tight text-white">
+      <div className="min-w-0 space-y-2">
+        <p className="truncate text-[clamp(1.375rem,2vw,1.9rem)] font-semibold tracking-tight text-white">
           {model.formattedPrice}
         </p>
-        <div className={`flex items-center gap-2 text-sm ${getToneClassName(model.trend)}`}>
+        <div
+          className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-sm ${getToneClassName(model.trend)}`}
+        >
           <span>{model.formattedChange}</span>
           <span>{model.formattedChangePct}</span>
         </div>

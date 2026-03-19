@@ -1,6 +1,7 @@
 "use client";
 
 import { LayoutGrid, PencilLine, Plus } from "lucide-react";
+import { useShallow } from "zustand/react/shallow";
 
 import { useDashboardStore } from "@/store/dashboard-store";
 
@@ -11,12 +12,12 @@ interface DashboardContextMenuProps {
 
 export function DashboardContextMenu({ x, y }: DashboardContextMenuProps) {
   const { closeContextMenu, editMode, openAddCardModal, toggleEditMode } = useDashboardStore(
-    (state) => ({
+    useShallow((state) => ({
       closeContextMenu: state.closeContextMenu,
       editMode: state.editMode,
       openAddCardModal: state.openAddCardModal,
       toggleEditMode: state.toggleEditMode,
-    }),
+    })),
   );
 
   return (
