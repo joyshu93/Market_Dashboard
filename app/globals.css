@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --app-bg: 6 10 18;
+  --app-panel: 11 17 28;
+  --app-panel-strong: 15 23 38;
+  --app-panel-soft: 18 27 42;
+  --app-border: 255 255 255;
+  --rise: 80 224 170;
+  --fall: 255 110 128;
+  --flat: 154 164 179;
+  --accent: 111 169 255;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  font-family: "IBM Plex Sans", "Segoe UI", "Helvetica Neue", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(53, 104, 186, 0.18), transparent 32%),
+    radial-gradient(circle at top right, rgba(138, 166, 225, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(7, 12, 22, 0.98), rgba(4, 7, 13, 1));
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  opacity: 0.24;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 100px 100px;
+  mask-image: radial-gradient(circle at center, black 30%, transparent 90%);
+}
+
+::selection {
+  color: white;
+  background: rgba(111, 169, 255, 0.38);
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+  }
+}
+
+@layer components {
+  .card-surface {
+    @apply rounded-[28px] border border-white/10 bg-white/[0.045] shadow-card backdrop-blur-xl;
+  }
+
+  .card-surface-strong {
+    @apply rounded-[32px] border bg-[rgba(14,22,35,0.86)] shadow-glow backdrop-blur-xl;
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .subtle-text {
+    @apply text-slate-400;
+  }
+
+  .metric-rise {
+    color: rgb(var(--rise));
+  }
+
+  .metric-fall {
+    color: rgb(var(--fall));
+  }
+
+  .metric-flat {
+    color: rgb(var(--flat));
+  }
+}
+
+.react-grid-layout {
+  min-height: 100%;
+  transition: height 150ms ease;
+}
+
+.react-grid-item {
+  transition:
+    transform 180ms ease,
+    width 180ms ease,
+    height 180ms ease;
+}
+
+.react-grid-item.react-grid-placeholder {
+  border-radius: 28px;
+  background: rgba(111, 169, 255, 0.18);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+}
+
+.react-resizable-handle {
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.react-grid-item:hover .react-resizable-handle,
+.react-grid-item.resizing .react-resizable-handle {
+  opacity: 1;
+}
