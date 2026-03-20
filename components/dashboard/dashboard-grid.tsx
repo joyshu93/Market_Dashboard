@@ -9,6 +9,7 @@ import { getLayoutForWidget, normalizeDashboardLayouts } from "@/lib/utils/dashb
 import {
   dashboardBreakpoints,
   dashboardCols,
+  widgetRegistry,
 } from "@/lib/widget-registry/widget-registry";
 import { dashboardMargin, dashboardPadding, dashboardRowHeight } from "@/lib/utils/dashboard";
 import { useDashboardStore } from "@/store/dashboard-store";
@@ -133,14 +134,27 @@ export function DashboardGrid() {
           setActiveBreakpoint((breakpoint as BreakpointKey) || "lg")
         }
       >
-        {widgets.map((widget) => (
-          <div key={widget.id}>
-            <WidgetRenderer
-              widget={widget}
-              layout={getLayoutForWidget(layouts, widget.id, activeBreakpoint)}
-            />
-          </div>
-        ))}
+        {widgets.map((widget) => {
+          const layout = getLayoutForWidget(layouts, widget.id, activeBreakpoint);
+          const canResize = widgetRegistry[widget.widgetType].allowedSizePresets.length > 1;
+
+          return (
+            <div
+              key={widget.id}
+              data-grid={
+                layout
+                  ? {
+                      ...layout,
+                      isResizable: editMode && canResize,
+                      isDraggable: editMode,
+                    }
+                  : undefined
+              }
+            >
+              <WidgetRenderer widget={widget} layout={layout} />
+            </div>
+          );
+        })}
       </ResponsiveGridLayout>
     </div>
   );

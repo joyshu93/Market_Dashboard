@@ -20,6 +20,7 @@ export type MetricTone = "positive" | "negative" | "neutral";
 export type ValueStyle = "number" | "currency" | "percent";
 export type SnapshotSource = "mock" | "fred" | "data-go-kr" | "alpha-vantage";
 export type MarketDataStatus = "idle" | "loading" | "live" | "partial" | "mock" | "error";
+export type SummarySessionKey = "morning" | "intraday" | "close";
 
 export interface InstrumentMetadata {
   precision?: number;
@@ -152,10 +153,16 @@ export interface ContextMenuState {
   y: number;
 }
 
-export interface SummaryCardData {
-  id: string;
+export interface SummaryCardContent {
   title: string;
   subtitle: string;
+  sessionLabel?: string;
+  updatedAtLabel?: string;
+  posture?: {
+    label: string;
+    message: string;
+    tone?: MetricTone;
+  };
   summary: string;
   stats: Array<{
     label: string;
@@ -163,6 +170,11 @@ export interface SummaryCardData {
     tone?: MetricTone;
   }>;
   highlights: string[];
+}
+
+export interface SummaryCardData extends SummaryCardContent {
+  id: string;
+  sessionVariants?: Partial<Record<SummarySessionKey, SummaryCardContent>>;
 }
 
 export interface NewsFeedItem {

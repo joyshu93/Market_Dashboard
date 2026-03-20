@@ -7,9 +7,17 @@ import { Button } from "@/components/ui/button";
 import { useDashboardStore } from "@/store/dashboard-store";
 
 export function DashboardHeader() {
-  const { editMode, openAddCardModal, setTheme, theme, toggleEditMode } = useDashboardStore(
+  const {
+    editMode,
+    marketDataMeta,
+    openAddCardModal,
+    setTheme,
+    theme,
+    toggleEditMode,
+  } = useDashboardStore(
     useShallow((state) => ({
       editMode: state.editMode,
+      marketDataMeta: state.marketDataMeta,
       openAddCardModal: state.openAddCardModal,
       setTheme: state.setTheme,
       theme: state.theme,
@@ -17,8 +25,24 @@ export function DashboardHeader() {
     })),
   );
 
+  const now = new Date();
+  const todayLabel = now.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+  });
+  const hour = now.getHours();
+  const sessionLabel =
+    hour < 9 ? "Before open" : hour < 15.5 ? "Intraday" : "After close";
+  const updatedAtLabel = marketDataMeta?.fetchedAt
+    ? new Date(marketDataMeta.fetchedAt).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "Mock data";
+
   return (
-    <header className="relative min-h-[72px]">
+    <header className="relative min-h-[108px]">
       <div className="flex justify-center">
         <div className="pointer-events-none rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-center text-xs font-medium uppercase tracking-[0.28em] text-slate-300">
           Market Home
@@ -53,6 +77,21 @@ export function DashboardHeader() {
           {editMode ? <Lock className="h-4 w-4" /> : <PencilLine className="h-4 w-4" />}
           {editMode ? "Lock layout" : "Edit layout"}
         </Button>
+      </div>
+
+      <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-center lg:justify-start lg:text-left">
+        <div className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Today</p>
+          <p className="mt-1 text-sm font-medium text-slate-200">{todayLabel}</p>
+        </div>
+        <div className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Session</p>
+          <p className="mt-1 text-sm font-medium text-slate-200">{sessionLabel}</p>
+        </div>
+        <div className="rounded-full border border-white/8 bg-white/[0.03] px-4 py-2">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Last updated</p>
+          <p className="mt-1 text-sm font-medium text-slate-200">{updatedAtLabel}</p>
+        </div>
       </div>
     </header>
   );

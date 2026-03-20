@@ -8,20 +8,98 @@ import type {
 export const summaryCards: Record<string, SummaryCardData> = {
   "market-overview": {
     id: "market-overview",
-    title: "Market Pulse",
-    subtitle: "30-second read",
+    title: "Today Market Brief",
+    subtitle: "Morning setup",
+    sessionLabel: "Asia open handoff",
+    updatedAtLabel: "Updated 08:40 KST",
+    posture: {
+      label: "Risk tone",
+      message: "Constructive, but still led by quality and lower yields.",
+      tone: "positive",
+    },
     summary:
-      "Risk sentiment is constructive. Korean equities are firmer, US growth is still leading, and lower Treasury yields are acting as the session's main support.",
+      "Korean risk assets have room to open steady as softer US yields and calmer crude keep the macro backdrop supportive. The tape still favors quality growth over broad risk chasing.",
     stats: [
-      { label: "Advancing", value: "6 / 9", tone: "positive" },
-      { label: "Falling", value: "2 / 9", tone: "negative" },
-      { label: "Rates Impulse", value: "Supportive", tone: "positive" },
+      { label: "Korea setup", value: "Firm open", tone: "positive" },
+      { label: "US lead", value: "Tech-led", tone: "positive" },
+      { label: "Macro watch", value: "Yields softer", tone: "positive" },
     ],
     highlights: [
-      "KOSPI and KOSDAQ both closed stronger with semis in leadership.",
-      "US tech remains the cleanest expression of risk appetite.",
-      "WTI is the main laggard, easing inflation pressure at the margin.",
+      "KOSPI and KOSDAQ both have breathing room if FX stays orderly into the morning session.",
+      "US growth remains the cleanest leadership pocket, but breadth is not yet broad enough to call a full risk breakout.",
+      "WTI easing while 10Y yields soften is the key relief signal to watch on the macro side.",
     ],
+    sessionVariants: {
+      morning: {
+        title: "Today Market Brief",
+        subtitle: "Morning setup",
+        sessionLabel: "Asia open handoff",
+        updatedAtLabel: "Updated 08:40 KST",
+        posture: {
+          label: "Risk tone",
+          message: "Constructive, but still led by quality and lower yields.",
+          tone: "positive",
+        },
+        summary:
+          "Korean risk assets have room to open steady as softer US yields and calmer crude keep the macro backdrop supportive. The tape still favors quality growth over broad risk chasing.",
+        stats: [
+          { label: "Korea setup", value: "Firm open", tone: "positive" },
+          { label: "US lead", value: "Tech-led", tone: "positive" },
+          { label: "Macro watch", value: "Yields softer", tone: "positive" },
+        ],
+        highlights: [
+          "KOSPI and KOSDAQ both have breathing room if FX stays orderly into the morning session.",
+          "US growth remains the cleanest leadership pocket, but breadth is not yet broad enough to call a full risk breakout.",
+          "WTI easing while 10Y yields soften is the key relief signal to watch on the macro side.",
+        ],
+      },
+      intraday: {
+        title: "Today Market Brief",
+        subtitle: "Intraday check",
+        sessionLabel: "Korea cash session",
+        updatedAtLabel: "Updated 11:55 KST",
+        posture: {
+          label: "Tape read",
+          message: "Steady risk-on, but leadership is still narrow.",
+          tone: "positive",
+        },
+        summary:
+          "Local equities are holding a constructive tone into midday, but the move still depends on semis, large-cap exporters, and a calm FX backdrop rather than broad participation.",
+        stats: [
+          { label: "KOSPI", value: "Holding highs", tone: "positive" },
+          { label: "Won", value: "Stable", tone: "positive" },
+          { label: "Breadth", value: "Mixed", tone: "neutral" },
+        ],
+        highlights: [
+          "The market is trading well enough, but this is still a quality-led session rather than a full risk chase.",
+          "Keep watching USD/KRW and 10Y yields. If both stay quiet, Korea can continue to digest gains cleanly.",
+          "Energy remains the soft pocket, which is helping inflation-sensitive assets at the margin.",
+        ],
+      },
+      close: {
+        title: "Today Market Brief",
+        subtitle: "Close recap",
+        sessionLabel: "Post-close wrap",
+        updatedAtLabel: "Updated 15:50 KST",
+        posture: {
+          label: "Closing read",
+          message: "Risk held up through the close with macro support intact.",
+          tone: "positive",
+        },
+        summary:
+          "Korean equities closed with a constructive tone as softer yields and calmer oil kept the macro backdrop supportive. Leadership stayed concentrated, but the session still favored risk over defense.",
+        stats: [
+          { label: "KOSPI close", value: "Stronger", tone: "positive" },
+          { label: "Rates impulse", value: "Supportive", tone: "positive" },
+          { label: "Oil", value: "Softer", tone: "positive" },
+        ],
+        highlights: [
+          "Semis and exporters did the heavy lifting again, which keeps the market positive but not fully broad-based.",
+          "The softer-yield backdrop remains the key support signal heading into the next session.",
+          "The best follow-through tomorrow likely depends on whether FX stays orderly and US growth leadership remains intact overnight.",
+        ],
+      },
+    },
   },
 };
 

@@ -19,8 +19,15 @@ npm run dev
 ```
 
 Open [http://localhost:3000/dashboard](http://localhost:3000/dashboard).
+Landing page: [http://localhost:3000](http://localhost:3000)
+Dashboard preview: [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
 
 Planning baseline: [`docs/product-mvp-plan.md`](./docs/product-mvp-plan.md)
+Strategy reset: [`docs/strategy-reset.md`](./docs/strategy-reset.md)
+Team operating model: [`TEAM.md`](./TEAM.md)
+Next sprint backlog: [`docs/next-sprint-backlog.md`](./docs/next-sprint-backlog.md)
+Validation playbook: [`docs/validation-playbook.md`](./docs/validation-playbook.md)
+Landing copy draft: [`docs/landing-copy.md`](./docs/landing-copy.md)
 
 ### Environment
 
